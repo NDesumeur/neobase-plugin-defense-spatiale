@@ -2,11 +2,25 @@
 // Ses données sont dans le dossier du plugin, que NeoBase sauvegarde (synchro cloud et sauvegardes) ; à la première ouverture elle reprend ce que tu avais dans NeoBase.
 // Elle demande l'accès complet pour utiliser les outils d'interface de NeoBase. NeoBase ne l'ouvre que si elle est signée.
 const HTML = "<div class=\"appWrap wide\">\n      <div class=\"agHead\"><span class=\"label\">Défense spatiale</span><span class=\"hint\" id=\"tdInfo\"></span><div class=\"agNav\"><select class=\"f gSel\" id=\"tdMap\"></select><select class=\"f gSel\" id=\"tdDiff\" title=\"Difficulté\"></select><button class=\"btn px\" id=\"tdNew\">NOUVELLE PARTIE</button></div></div>\n      <div class=\"gameBox g85\"><canvas id=\"tdCanvas\" width=\"384\" height=\"240\"></canvas></div>\n      <div class=\"tdBar\"><div id=\"tdTowers\"></div><div class=\"sysCard px\" id=\"tdSel\"></div><div class=\"tdCtl\"><button class=\"btn main px\" id=\"tdWaveBtn\">LANCER LA VAGUE 1</button><button class=\"btn px\" id=\"tdFast\">VITESSE ×1</button></div></div>\n      <div class=\"hint\">1 à 5 : choisir une tourelle · Maj + clic : en poser plusieurs · clic sur une tourelle : l'améliorer (U) ou la vendre (V) · espace : pause · clic droit ou Échap : annuler.</div>\n    </div>";
+/*CSS-MOVED*/ const CSS = `.gameBox{display:grid;place-items:center;padding:10px;background:#05010b;box-shadow:0 0 0 3px var(--line2)}
+.gameBox canvas{width:min(100%,1152px);aspect-ratio:384/144;image-rendering:pixelated;cursor:var(--cp,pointer)}
+.gameBox.tall canvas{width:auto;height:min(720px,72vh);aspect-ratio:240/320}
+.gSel{width:auto;font-size:14px;padding:6px 10px;margin-right:8px}
+.gameBox.g85 canvas{aspect-ratio:384/240;width:min(100%,calc((100vh - 360px) * 1.6))}
+.tdBar{display:flex;gap:16px;align-items:stretch;flex-wrap:wrap}
+#tdTowers{display:flex;gap:10px;flex-wrap:wrap}
+.tdTower{height:auto;padding:8px 12px;display:grid;grid-template-columns:32px auto;grid-template-rows:auto auto;column-gap:10px;text-align:left;font-size:15px}
+.tdTower img{grid-row:span 2;width:32px;height:32px;image-rendering:pixelated}
+.tdTower small{font-size:12px;color:var(--lilac);font-weight:400}
+#tdSel{flex:1;min-width:240px}
+.tdCtl{display:flex;flex-direction:column;gap:10px}
+`;  // le style de ce plugin (il utilise les variables du thème de NeoBase)
 export default async function (ctx) {
   const view = ctx.view;
   if (!ctx.host) { view.textContent = "Ce plugin doit être approuvé par NeoBase pour s'ouvrir."; return; }
   const host = ctx.host, { el, toast, sfx, ask, newTab, pixIcon, PIX, WX } = host;
   const folder = ctx.folder, legacy = ctx.legacy || {};
+  ctx.host.addStyle(CSS);
   view.innerHTML = HTML;
   const $ = id => id === "defenseApp" ? view : (view.querySelector('#' + id) || document.getElementById(id));  // les identifiants de ta vue d'abord, puis ceux de la page (fenêtres, menus)
   const doc = async n => { try { return await folder.read(n); } catch { return null; } };
