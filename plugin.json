@@ -1,7 +1,7 @@
 {
   "id": "neobase.defensespatiale",
   "name": "Défense spatiale",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "author": "NDesumeur",
   "description": "Construis et améliore 5 types de tourelles le long de la route : 30 vagues, un boss toutes les 10.",
   "icon": "icon.png",
