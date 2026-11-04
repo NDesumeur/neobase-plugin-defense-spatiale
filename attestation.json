@@ -1,6 +1,6 @@
 {
-  "pluginId": "neobase.defensespatiale",
-  "repo": "NDesumeur/neobase-plugin-defense-spatiale",
+  "pluginId": "neodex.defensespatiale",
+  "repo": "NDesumeur/neodex-plugin-defense-spatiale",
   "version": "1.1.0",
   "sha256": "69f135169446e954c348770890f9566a01e667ca23504d23313606b0473da729",
   "approvedAt": "2026-10-31T22:44:06.003Z",
