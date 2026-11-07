@@ -83,6 +83,16 @@ const TD_MAPS = [
   {name: 'Delta', paths: [[[-1, 1], [6, 1], [6, 7], [24, 7]], [[-1, 13], [6, 13], [6, 7], [24, 7]], [[14, 15], [14, 7], [24, 7]]]},
   {name: 'Boucles', paths: [[[-1, 2], [8, 2], [8, 6], [3, 6], [3, 10], [12, 10], [12, 6], [17, 6], [17, 2], [21, 2], [21, 12], [24, 12]]]},
   {name: 'Forteresse', paths: [[[-1, 7], [2, 7], [2, 2], [21, 2], [21, 12], [6, 12], [6, 7], [16, 7]]]},
+  {name: 'Comète', paths: [[[-1, 12], [5, 12], [5, 3], [10, 3], [10, 12], [15, 12], [15, 3], [20, 3], [20, 8], [24, 8]]]},
+  {name: 'Nébuleuse', paths: [[[-1, 4], [6, 4], [6, 10], [12, 10], [12, 2], [17, 2], [17, 12], [24, 12]], [[-1, 13], [3, 13], [3, 10], [6, 10]]]},
+  {name: 'Trou noir', paths: [[[-1, 1], [23, 1], [23, 13], [1, 13], [1, 3], [21, 3], [21, 11], [3, 11], [3, 5], [19, 5], [19, 9], [5, 9], [5, 7], [12, 7]]]},
+  {name: 'Orbite basse', paths: [[[-1, 10], [24, 10]], [[-1, 4], [24, 4]]]},
+  {name: 'Satellite', paths: [[[12, -1], [12, 4], [4, 4], [4, 11], [20, 11], [20, 4], [14, 4], [14, 8], [24, 8]]]},
+  {name: 'Pluie d\'étoiles', paths: [[[3, -1], [3, 6], [9, 6], [9, 15]], [[11, -1], [11, 9], [17, 9], [17, 15]], [[19, -1], [19, 4], [24, 4]]]},
+  {name: 'Station', paths: [[[-1, 7], [5, 7], [5, 2], [18, 2], [18, 7], [11, 7], [11, 12], [24, 12]]]},
+  {name: 'Éclipse', paths: [[[-1, 2], [16, 2], [16, 6], [7, 6], [7, 10], [16, 10], [16, 13], [24, 13]], [[-1, 13], [4, 13], [4, 10], [7, 10]]]},
+  {name: 'Hyperespace', paths: [[[-1, 1], [2, 1], [2, 13], [5, 13], [5, 1], [8, 1], [8, 13], [11, 13], [11, 1], [14, 1], [14, 13], [17, 13], [17, 1], [20, 1], [20, 13], [24, 13]]]},
+  {name: 'Dernier rempart', paths: [[[-1, 2], [8, 2], [8, 7], [24, 7]], [[-1, 12], [8, 12], [8, 7], [24, 7]], [[14, -1], [14, 7], [24, 7]], [[14, 15], [14, 7], [24, 7]]]},
 ];
 // how hard: enemy health and speed, gold, lives (the records are kept per map and per difficulty)
 const TD_DIFFS = {facile: {name: 'Facile', hp: .7, spd: .9, gold: 1.3, lives: 30, start: 280}, normal: {name: 'Normal', hp: 1, spd: 1, gold: 1, lives: 20, start: 220},
@@ -103,7 +113,9 @@ const TD_FOES = {
   drone: {name: 'Drone', hp: 30, spd: .55, gold: 5, size: 5, color: '#b46aee'},
   eclaireur: {name: 'Éclaireur', hp: 18, spd: 1, gold: 4, size: 4, color: '#7fe0ee'},
   essaim: {name: 'Essaim', hp: 11, spd: .8, gold: 2, size: 3, color: '#8ee8a0'},
-  cuirasse: {name: 'Cuirassé', hp: 120, spd: .34, gold: 12, armor: 4, size: 7, color: '#c9bdf0'},
+  grappe: {name: 'Grappe', hp: 40, spd: .5, gold: 3, size: 6, color: '#6ad0a0', split: ['essaim', 4]},  // éclate en 4 essaims
+  ruche: {name: 'Ruche', hp: 160, spd: .32, gold: 8, size: 8, color: '#d0b86a', armor: 2, split: ['grappe', 3]},  // éclate en 3 grappes
+  cuirasse: {name: 'Cuirassé', hp: 120, spd: .34, gold: 12, armor: 4, size: 7, color: '#c9bdf0', split: ['drone', 2]},  // libère 2 drones
   bouclier: {name: 'Porte-bouclier', hp: 60, shield: 50, spd: .5, gold: 10, size: 6, color: '#ff5ad9'},
   foreuse: {name: 'Foreuse', hp: 45, spd: 1.3, gold: 7, size: 4, color: '#ffd07a'},
   meduse: {name: 'Méduse', hp: 90, spd: .45, gold: 9, size: 5, color: '#ff8ae6', regen: .0016},
@@ -125,6 +137,8 @@ function tdWave(w) {  // groups of enemies, one after the other
   if (w >= 8 && w % 3 === 2) g.push({type: 'meduse', n: n(3), gap: 55});
   if (w >= 12 && w % 2 === 1) g.push({type: 'fantome', n: n(4), gap: 40});
   if (w >= 22 && w % 5 !== 0) g.push({type: 'titan', n: Math.max(1, Math.floor((w - 20) / 8)), gap: 120});
+  if (w >= 5 && w % 3 === 0) g.push({type: 'grappe', n: n(4), gap: 40});
+  if (w >= 15 && w % 4 === 2) g.push({type: 'ruche', n: Math.max(1, Math.floor(w / 10)), gap: 110});
   return g;
 }
 let td = null;
@@ -183,6 +197,8 @@ function tdStep() {
     if (e.maxShield && e.hit > 90 && e.shield < e.maxShield) e.shield = Math.min(e.maxShield, e.shield + e.maxShield * .004);
     [e.x, e.y] = tdPos(route, e.d);
     if (e.d >= route.len) { e.gone = true; td.lives -= def.lives || 1; td.shake = 8; sfx('error'); }
+    if (e.hp <= 0 && !e.gone && def.split && !e.dead) { const [kid, nk] = def.split, kd = TD_FOES[kid], k = tdHp(td.wave) * TD_DIFFS[td.diff].hp;
+      for (let i = 0; i < nk; i++) td.foes.push({type: kid, route: e.route, d: Math.max(0, e.d - i * 6), hp: kd.hp * k, max: kd.hp * k, shield: 0, maxShield: 0, slowT: 0, slowF: 0, hit: 0, flash: 4, wob: Math.random() * 6}); }
     if (e.hp <= 0 && !e.gone) { e.dead = true; td.gold += Math.round(def.gold * TD_DIFFS[td.diff].gold); td.kills++; for (let i = 0; i < (e.type === 'boss' ? 40 : 8); i++) td.parts.push({x: e.x, y: e.y, vx: (Math.random() - .5) * 2.4, vy: (Math.random() - .5) * 2.4, life: 16 + Math.random() * 20, color: i % 2 ? def.color : '#ffd07a'}); }
   }
   td.foes = td.foes.filter(e => !e.dead && !e.gone);
@@ -230,7 +246,7 @@ function tdStep() {
   if (td.lives <= 0) { td.lives = 0; td.mode = 'over'; td.overAt = Date.now(); td.record = best(tdKey(), td.wave - 1); saveGames(); sfx('error'); return tdUi(); }
   if (td.wave && !td.queue.length && !td.foes.length && td.next === 0) {  // wave cleared
     td.gold += Math.round((20 + td.wave * 3) * TD_DIFFS[td.diff].gold); best(tdKey(), td.wave); saveGames();
-    if (td.wave === TD_LAST && !td.won) { td.won = true; td.banner = {text: 'VICTOIRE ! Les ' + TD_LAST + ' vagues sont repoussées', t: 240}; sfx('launch'); }
+    if (td.wave === TD_LAST && !td.won) { td.won = true; td.banner = {text: 'VICTOIRE ! Médaille ' + TD_DIFFS[td.diff].name.toLowerCase() + ' gagnée', t: 240}; sfx('launch'); tdMapList(); }
     td.next = 900; tdUi();
   }
   if (td.next > 0 && --td.next === 0) tdCallWave();
@@ -369,7 +385,9 @@ $('tdCanvas').onpointerdown = e => {
 $('tdWaveBtn').onclick = () => tdCallWave();
 $('tdFast').onclick = () => { td.fast = !td.fast; tdUi(); };
 $('tdNew').onclick = () => tdStart();
-$('tdMap').replaceChildren(...TD_MAPS.map((m, i) => { const o = el('option', '', m.name); o.value = i; return o; }));
+const tdMedals = i => Object.keys(TD_DIFFS).filter(d => (games?.best['td' + i + (d === 'normal' ? '' : d)] ?? 0) >= TD_LAST).length;
+const tdMapList = () => { const v = $('tdMap').value; $('tdMap').replaceChildren(...TD_MAPS.map((m, i) => { const n = tdMedals(i), o = el('option', '', (i + 1) + '. ' + m.name + (n ? ' ' + '★'.repeat(n) : '')); o.value = i; return o; })); if (v) $('tdMap').value = v; };
+tdMapList();
 $('tdMap').onchange = () => tdStart();
 $('tdDiff').replaceChildren(...Object.entries(TD_DIFFS).map(([k, d]) => { const o = el('option', '', d.name); o.value = k; return o; }));
 $('tdDiff').value = 'normal';
